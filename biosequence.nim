@@ -41,7 +41,10 @@ proc toFasta*(self:Record, lineLength = 60): string =
 proc toFastq*(self:Record, qualityValue = 0): string =
   ## returns FASTQ formatted string of sequence record with optional quality
   ## value to be applied to sequence
-  "@" & self.id & "\n" & self.sequence & "\n+\n" & self.quality
+  var header = ">" & self.id
+  if self.description != "":
+    header = header & " " & self.description
+  header & "\n" & self.sequence & "\n+\n" & self.quality
 
 proc length*(self:Record): int = 
   ## returns length of sequence
