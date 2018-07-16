@@ -1,18 +1,22 @@
-= Module nimbioSeq =
+# Module nimbioSeq 
 
-== Imports ==
+## Imports
 sequtils, strutils, math, tables, osproc, streams
 
-== Types ==
+## Types 
 Record = object
+
   id*: string
+  
   description*: string
+  
   quality*: string
+  
   sequence*: string
   
 This type represents a genetic sequence with optional quality
 
-== Procs ==
+## Procs
 
 proc reverseComplement(self: Record): Record {..}
 
@@ -50,7 +54,8 @@ proc translate(self: Record; code = 1): Record {..}
 translates a nucleotide sequence with the given genetic code number
 
 
-=== Iterators ==
+## Iterators
+
 iterator compressedLines(filename: string): string {..}
 iterator to read lines of a (maybe) compressed text file transparently
 
