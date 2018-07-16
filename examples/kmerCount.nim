@@ -1,4 +1,4 @@
-import biosequence, future, tables, sequtils, strutils, os, math
+import nimbioseq, future, tables, sequtils, strutils, os, math
 
 proc seqSummary(input: string, kmer = 8, complement = false,
                                       relAbund = false) =

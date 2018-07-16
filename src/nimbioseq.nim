@@ -38,13 +38,22 @@ proc toFasta*(self:Record, lineLength = 60): string =
                        proc(x:int):string = 
                          self.sequence[x..x+lineLength-1]).join("\n")
 
-proc toFastq*(self:Record, qualityValue = 0): string =
-  ## returns FASTQ formatted string of sequence record with optional quality
+proc qualToChar*(q: int): char =
+  ## returns character for a given Illumina quality score
+  (q+33).char
+  
+proc charToQual*(c: char): int =
+  ## returns Illumina quality score for a given character
+  c.ord - 33
+
+proc toFastq*(self:Record, qualityValue = 30): string =
+  ## returns FASTQ formatted string of sequence record with given quality
   ## value to be applied to sequence
-  var header = ">" & self.id
+  var header = "@" & self.id
+  var quality = strutils.repeat(qualityValue.qualToChar, self.sequence.len)
   if self.description != "":
     header = header & " " & self.description
-  header & "\n" & self.sequence & "\n+\n" & self.quality
+  header & "\n" & self.sequence & "\n+\n" & quality
 
 proc length*(self:Record): int = 
   ## returns length of sequence

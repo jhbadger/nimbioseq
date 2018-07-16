@@ -1,4 +1,4 @@
-import biosequence, os, strutils
+import nimbioseq, os, strutils
 
 proc checkFastq(input: string, total = false) =
     if input != nil:

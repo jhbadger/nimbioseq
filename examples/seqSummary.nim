@@ -1,4 +1,4 @@
-import biosequence, os, strutils
+import nimbioseq, os, strutils
 
 proc mbp(length: int):string = formatFloat(float(length)/1e6, 
                                            ffDecimal,
