@@ -7,7 +7,7 @@ proc seqSummary(input: string, kmer = 8, complement = false,
   var freqs:seq[float]
   var i = 0
   let maxNum = 4^kmer
-  if input != nil:
+  if input != "":
     stdout.write "Name"
     while i < maxNum:
       stdout.write "\t"

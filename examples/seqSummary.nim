@@ -10,7 +10,7 @@ proc percent(num, length:int):string = formatFloat(float(num*100/length),
 
 proc seqSummary(input: string, total = false) =
   let progName = split(getAppFilename(), "/")[getAppFileName().count("/")]
-  if input != nil:
+  if input != "":
     var totalLength, totalGC, totalAmbig, numSeq, maxLen, minLen = 0
     for s in readSeqs(input):
       if total:
