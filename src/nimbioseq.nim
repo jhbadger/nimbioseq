@@ -34,7 +34,7 @@ proc toFasta*(self:Record, lineLength = 60): string =
   var header = ">" & self.id
   if self.description != "":
     header = header & " " & self.description
-  header & "\n" &  map(toSeq(countup(0,self.sequence.len(), lineLength)),
+  header & "\n" & map(toSeq(countup(0,self.sequence.len(), lineLength)),
                        proc(x:int):string = 
                          self.sequence[x..x+lineLength-1]).join("\n")
 
@@ -154,14 +154,14 @@ iterator compressedLines*(filename: string): string =
   
 iterator readFasta*(filename: string): Record =
   ## iterator to iterate over the FASTA records in a file
-  var s = Record(id:nil, description:"", sequence:"")
+  var s = Record(id:"", description:"", sequence:"")
   var seqLines = @[""]
   for line in compressedLines filename:
     if line[0] == '>':
-      if s.id != nil:
+      if s.id != "":
         s.sequence = seqLines.join
         yield s
-        s.id = nil
+        s.id = ""
         s.description = ""
         s.sequence = ""
         seqLines = @[]
@@ -172,19 +172,19 @@ iterator readFasta*(filename: string): Record =
         s.id = fields[0]
     else:
       seqLines.add(line)
-  if s.id != nil:
+  if s.id != "":
     s.sequence = seqLines.join
     yield s
 
 iterator readFastq*(filename:string): Record =
   ## iterator to iterate over the FASTQ records in a file
-  var s = Record(id:nil, description:"", quality: "", sequence:"")
+  var s = Record(id:"", description:"", quality: "", sequence:"")
   var lineNum = 0
   for line in compressedLines filename:
     if lineNum == 0:
-      if s.id != nil:
+      if s.id != "":
         yield s
-        s.id = nil
+        s.id = ""
         s.description = ""
         s.sequence = ""
         s.quality = ""
@@ -198,7 +198,7 @@ iterator readFastq*(filename:string): Record =
     elif lineNum == 3:
       s.quality = line
     lineNum = (lineNum + 1) mod 4
-  if s.id != nil:
+  if s.id != "":
     yield s
            
 
