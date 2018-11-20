@@ -61,7 +61,7 @@ proc length*(self:Record): int =
 
 proc kmer2num*(kmer:string):int =
   ## converts a kmer string into an integer 0..4^(len-1)
-  let baseVal = {'A': 0, 'C': 1, 'G': 2, 'T': 3, 'U': 0}.toTable
+  let baseVal = {'T': 0, 'C': 1, 'A': 2, 'G': 3, 'U': 0}.toTable
   let klen = len(kmer)
   var num = 0
   for i in 0..(klen - 1):
@@ -75,7 +75,7 @@ proc kmer2num*(kmer:string):int =
 
 proc num2kmer*(num, klen:int):string =
   ## converts an integer into a kmer string given the number and length of kmer
-  let baseVal = {0:'A', 1:'C', 2:'G', 3:'T'}.toTable
+  let baseVal = {0:'T', 1:'C', 2:'A', 3:'G'}.toTable
   var kmer = repeat(" ",klen)
   var n = num
   for i in 0..(klen - 1):
@@ -115,7 +115,7 @@ proc ambiguous*(self:Record): int =
 iterator codons(self: Record) : string = 
   var i = 0
   var s = self.sequence.toUpperAscii
-  while i < self.length:
+  while i < self.length - 2:
     let codon = s[i..i+2]
     if codon.len == 3:
        yield codon
@@ -123,13 +123,41 @@ iterator codons(self: Record) : string =
 
 proc translate*(self:Record, code = 1): Record = 
   ## translates a nucleotide sequence with the given genetic code number
+  ## see https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi for codes
   var codeMap = 
-    "FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"
+    ["FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNKKSS**VVVVAAAADDEEGGGG",
+     "FFLLSSSSYY**CCWWTTTTPPPPHHQQRRRRIIMMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNKKSSSSVVVVAAAADDEEGGGG",
+     "FFLLSSSSYYQQCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "", "",
+     "FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIIMTTTTNNNKSSSSVVVVAAAADDEEGGGG",
+     "FFLLSSSSYY**CCCWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYY**CC*WLLLSPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNKKSSGGVVVVAAAADDEEGGGG",
+     "FFLLSSSSYYY*CCWWLLLLPPPPHHQQRRRRIIIMTTTTNNNKSSSSVVVVAAAADDEEGGGG",
+     "",
+     "FFLLSSSSYY*LCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "", "", "", "",
+     "FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIMMTTTTNNNKSSSSVVVVAAAADDEEGGGG",
+     "FFLLSS*SYY*LCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FF*LSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYY**CCWWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSSKVVVVAAAADDEEGGGG",
+     "FFLLSSSSYY**CCGWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYY**CC*WLLLAPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYYQQCCWWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYYQQCCWWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYYYYCC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYYEECC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG",
+     "FFLLSSSSYYEECCWWLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG"]
+  var code = codeMap[code - 1]
   var transeq = newseq[char]()
   for codon in self.codons:
     let num = kmer2num(codon)
     if num != -1:
-      transeq.add(codeMap[num])
+      transeq.add(code[num])
     else:
       transeq.add('X')
   Record(id:self.id, description: self.description, quality: self.quality,
