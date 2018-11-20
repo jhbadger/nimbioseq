@@ -10,4 +10,4 @@ skipFiles     = @["checkFastq.nim", "extractFastx.nim", "kmerCount.nim",
 
 # Dependencies
 
-requires "nim >= 0.17.2"
+requires "nim >= 0.17.2", "zip >= 0.2.1"

@@ -1,6 +1,6 @@
 ## Nim routines for processing DNA/RNA/Protein sequences
 
-import sequtils, strutils, math, tables, osproc, streams
+import sequtils, strutils, math, tables, osproc, streams, zip/gzipfiles
 
 type Record* = object
     ## This type represents a genetic sequence with optional quality
@@ -28,7 +28,6 @@ proc reverseComplement*(self:Record):Record =
   Record(id:self.id, description: self.description, quality: self.quality,
          sequence: revseq.join)
 
-
 proc toFasta*(self:Record, lineLength = 60): string =
   ## returns FASTA formatted string of sequence record
   var header = ">" & self.id
@@ -41,7 +40,7 @@ proc toFasta*(self:Record, lineLength = 60): string =
 proc qualToChar*(q: int): char =
   ## returns character for a given Illumina quality score
   (q+33).char
-  
+
 proc charToQual*(c: char): int =
   ## returns Illumina quality score for a given character
   c.ord - 33
@@ -55,7 +54,7 @@ proc toFastq*(self:Record, qualityValue = 30): string =
     header = header & " " & self.description
   header & "\n" & self.sequence & "\n+\n" & quality
 
-proc length*(self:Record): int = 
+proc length*(self:Record): int =
   ## returns length of sequence
   self.sequence.len()
 
@@ -163,28 +162,12 @@ proc translate*(self:Record, code = 1): Record =
   Record(id:self.id, description: self.description, quality: self.quality,
          sequence: transeq.join)
 
-iterator compressedLines*(filename: string): string =
-  ## iterator to read lines of a (maybe) compressed text file transparently
-  var command = "none"
-  if filename.find(".gz") > -1:
-    command = "gzcat"
-  elif filename.find(".bz2") > -1:
-    command = "bzcat"
-  if command == "none":
-    for line in lines filename:
-      yield line
-  else:
-    var process = startProcess(command, args=[filename], options={poUsePath})
-    var line = TaintedString("")
-    while process.outputStream.readLine(line):
-      yield line
-    process.close
-  
 iterator readFasta*(filename: string): Record =
   ## iterator to iterate over the FASTA records in a file
   var s = Record(id:"", description:"", sequence:"")
   var seqLines = @[""]
-  for line in compressedLines filename:
+  var stream = newGZFileStream(filename, fmRead)
+  for line in lines stream:
     if line[0] == '>':
       if s.id != "":
         s.sequence = seqLines.join
@@ -208,7 +191,8 @@ iterator readFastq*(filename:string): Record =
   ## iterator to iterate over the FASTQ records in a file
   var s = Record(id:"", description:"", quality: "", sequence:"")
   var lineNum = 0
-  for line in compressedLines filename:
+  var stream = newGZFileStream(filename, fmRead)
+  for line in lines stream:
     if lineNum == 0:
       if s.id != "":
         yield s
@@ -228,10 +212,10 @@ iterator readFastq*(filename:string): Record =
     lineNum = (lineNum + 1) mod 4
   if s.id != "":
     yield s
-           
 
-iterator readSeqs*(filename:string):Record = 
-  for line in compressedLines filename:
+iterator readSeqs*(filename:string):Record =
+  var stream = newGZFileStream(filename, fmRead)
+  for line in lines stream:
     if line[0] == '>':
       for s in readFasta(filename):
         yield s
