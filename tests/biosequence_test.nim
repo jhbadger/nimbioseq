@@ -1,4 +1,4 @@
-import unittest
+import unittest, os
 include "../src/nimbioseq.nim"
 
 test "Does Reverse complement work":
@@ -18,3 +18,15 @@ test "Does translation work":
 test "Do alternate genetic codes work":
       var s3 = Record(sequence:"TAATAG")
       check(s3.translate(30).sequence == "EE")
+test "Does loading gzip file work":
+        var cmd = "echo '>foo\nAAATTTAAAAAATTTAAAT' > test.fa;gzip test.fa"
+        discard os.execShellCmd(cmd)
+        for s in readSeqs("test.fa.gz"):
+          check(s.id=="foo")
+        discard os.execShellCmd("rm test.fa.gz")
+test "Does loading bzip2 file work":
+        var cmd = "echo '>foo\nAAATTTAAAAAATTTAAAT' > test.fa;bzip2 test.fa"
+        discard os.execShellCmd(cmd)
+        for s in readSeqs("test.fa.bz2"):
+          check(s.id=="foo")
+        discard os.execShellCmd("rm test.fa.bz2")

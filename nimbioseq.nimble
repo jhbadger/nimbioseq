@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.3.20181119"
+version       = "0.3.20181121"
 author        = "Jonathan Badger"
 description   = "Nim Library for sequence (protein/nucleotide) bioinformatics"
 license       = "BSD-3"
@@ -10,4 +10,4 @@ skipFiles     = @["checkFastq.nim", "extractFastx.nim", "kmerCount.nim",
 
 # Dependencies
 
-requires "nim >= 0.17.2"
+requires "nim >= 0.17.2", "zip >= 0.2.1"

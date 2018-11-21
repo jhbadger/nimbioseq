@@ -1,6 +1,6 @@
 ## Nim routines for processing DNA/RNA/Protein sequences
 
-import sequtils, strutils, math, tables, osproc, streams
+import sequtils, strutils, math, tables, osproc, streams, zip/gzipfiles
 
 type Record* = object
     ## This type represents a genetic sequence with optional quality
@@ -167,7 +167,8 @@ iterator compressedLines*(filename: string): string =
   ## iterator to read lines of a (maybe) compressed text file transparently
   var command = "none"
   if filename.find(".gz") > -1:
-    command = "gzcat"
+    for line in lines newGZFileStream(filename, fmRead):
+      yield line
   elif filename.find(".bz2") > -1:
     command = "bzcat"
   if command == "none":
