@@ -165,21 +165,19 @@ proc translate*(self:Record, code = 1): Record =
 
 iterator compressedLines*(filename: string): string =
   ## iterator to read lines of a (maybe) compressed text file transparently
-  var command = "none"
   if filename.find(".gz") > -1:
     for line in lines newGZFileStream(filename, fmRead):
       yield line
   elif filename.find(".bz2") > -1:
-    command = "bzcat"
-  if command == "none":
-    for line in lines filename:
-      yield line
-  else:
-    var process = startProcess(command, args=[filename], options={poUsePath})
+    var process = startProcess("bzcat", args=[filename], options={poUsePath})
     var line = TaintedString("")
     while process.outputStream.readLine(line):
       yield line
     process.close
+  else:
+    for line in lines filename:
+      yield line
+    
   
 iterator readFasta*(filename: string): Record =
   ## iterator to iterate over the FASTA records in a file

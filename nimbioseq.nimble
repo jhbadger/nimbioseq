@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.3.20181121"
+version       = "0.3.20181126"
 author        = "Jonathan Badger"
 description   = "Nim Library for sequence (protein/nucleotide) bioinformatics"
 license       = "BSD-3"
