@@ -50,7 +50,9 @@ proc toFastq*(self:Record, qualityValue = 30): string =
   ## returns FASTQ formatted string of sequence record with given quality
   ## value to be applied to sequence
   var header = "@" & self.id
-  var quality = strutils.repeat(qualityValue.qualToChar, self.sequence.len)
+  var quality = self.quality
+  if quality == "":
+    quality = strutils.repeat(qualityValue.qualToChar, self.sequence.len)
   if self.description != "":
     header = header & " " & self.description
   header & "\n" & self.sequence & "\n+\n" & quality
