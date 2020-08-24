@@ -12,8 +12,10 @@ type Record* = object
 proc reverseComplement*(self:Record):Record =
   # returns reverse complement of sequence
   var revseq = newseq[char]()
+  var revqual = newseq[char]()
   var slen = len(self.sequence)
   for i in 1..slen:
+    revqual.add(self.sequence[slen - i])
     case self.sequence[slen - i]:
       of 'A':
         revseq.add('T')
@@ -25,7 +27,7 @@ proc reverseComplement*(self:Record):Record =
         revseq.add('A')
       else:
         revseq.add('N')
-  Record(id:self.id, description: self.description, quality: self.quality,
+  Record(id:self.id, description: self.description, quality: revqual.join,
          sequence: revseq.join)
 
 
